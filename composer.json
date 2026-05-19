@@ -12,11 +12,11 @@
         "symfony/dependency-injection": "^7.4||^8.0",
         "symfony/http-kernel": "^7.4||^8.0",
         "twig/twig": "^3.4",
-        "survos/core-bundle": "^2.0",
         "knplabs/knp-menu-bundle": "^3.2",
         "symfony/event-dispatcher": "^7.4||^8.0",
         "symfony/ux-twig-component": "^2.0|^3.0",
-        "symfony/options-resolver": "^7.4||^8.0"
+        "symfony/options-resolver": "^7.4||^8.0",
+        "survos/kit-bundle": "^2.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.0",

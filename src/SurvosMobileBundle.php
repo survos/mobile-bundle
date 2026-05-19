@@ -2,7 +2,7 @@
 
 namespace Survos\MobileBundle;
 
-use Survos\CoreBundle\Bundle\AssetMapperBundle;
+use Survos\Kit\AbstractUxBundle;
 use Survos\MobileBundle\Event\KnpMenuEvent;
 use Survos\MobileBundle\Components\MenuComponent;
 use Survos\MobileBundle\Menu\MenuService;
@@ -13,7 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
-class SurvosMobileBundle extends AssetMapperBundle implements CompilerPassInterface
+class SurvosMobileBundle extends AbstractUxBundle implements CompilerPassInterface
 {
     public const ASSET_PACKAGE = 'mobile';
 
