@@ -18,12 +18,6 @@ class SurvosMobileBundle extends AbstractUxBundle implements CompilerPassInterfa
 {
     public const ASSET_PACKAGE = 'mobile';
 
-    public function build(ContainerBuilder $container): void
-    {
-        parent::build($container);
-        $container->addCompilerPass($this);
-    }
-
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
