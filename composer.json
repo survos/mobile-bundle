@@ -14,7 +14,7 @@
         "symfony/routing": "^8.1",
         "twig/twig": "^3.4",
         "symfony/ux-twig-component": "^3",
-        "symfony/ux-icons": "^2.29",
+        "symfony/ux-icons": "^2.29 || ^3.0",
         "survos/kit-bundle": "^2.5",
         "survos/atlas-bundle": "*",
         "survos/fw-bundle": "*",
