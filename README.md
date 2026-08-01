@@ -1,114 +1,69 @@
 # Survos Mobile Bundle
 
-A collection of tools to help create Symfony-based mobile apps.
+Declarative app pages for Framework7/Dexie Symfony PWAs — sits on top of
+[`survos/fw-bundle`](../fw-bundle) (F7 chrome) and
+[`survos/js-twig-bundle`](../js-twig-bundle) (client-side Twig render + Dexie
+sync). Rewritten 2026-08 — the old OnsenUI version is gone; nothing here was
+reused.
 
-* OnsenUI 
-* pwa-bundle
-* Dexie
+## `#[MobilePage]`
 
-Work in Progress.  See survos-sites/pokemon to see this in action.
-
-## Notes
-
-These need to be cleaned up, but they're useful to me during development.
-
-### Twig
-
-The application can be run as an SPA.  The initial page must extend the base page
-
-    {% extends "@SurvosMobile/base.html.twig" %}
-
-create app_controller and extend it from 
-
-If using the OnsenUI documentation, replace 
-
-    onclick="loadPage('whatever')"
- 
-with 
-
-      {{ stimulus_action(_app_sc, 'loadPage', 'click', {
-          route: 'whatever'
-      }) }}
-
-_app_sc should be set to 'app', someday this may change (https://github.com/hotwired/stimulus/issues/641)
-
-### Tabs and Pages
-
-Two fundamental concepts: the tabs at the bottom of the screen, and everything else.
-
-All pages, though, are pre-loaded as twig templates in OnsenController.  
-
-To create the tabs, the following, where id is the name of the tab template
+Pair it with a normal Symfony `#[Route]` (which must carry an explicit
+`name:` — routes without one are invisible to the registry, same rule as
+`survos/field-bundle`'s `#[RouteMeta]`):
 
 ```php
-#[AsEventListener(event: KnpMenuEvent::MOBILE_TAB_MENU)]
-public function tabMenu(KnpMenuEvent $event): void
+use Survos\MobileBundle\Attribute\MobilePage;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/pages/review', name: 'app_review')]
+#[MobilePage(title: 'Review', icon: 'tabler:cards', tab: 'study')]
+public function review(): Response
 {
-    $menu = $event->getMenu();
-        $this->add($menu, id: 'projects', label: 'projects', icon: 'fa-list');
-        $this->add($menu, id: 'tours', label: 'tours', icon: 'fa-list', badge: 'x');
-        $this->add($menu, id: 'share', label: 'share', icon: 'fa-qrcode');
-
+    return $this->render('pages/review.html.twig');
+}
 ```
 
-## Events
+`MobilePagePass` (a compiler pass, built on `survos/atlas-bundle`'s
+`ControllerAtlasBuilder` — see `field-bundle`'s `RouteMetaPass` for the same
+pattern) collects every `#[Route]` + `#[MobilePage]` pair at compile time into
+`MobilePageRegistry`, exposed to Twig as the `mobile_pages` global. Render the
+tab bar with:
 
-When a tab is clicked, a 'prechange' event is dispatched, with  event.tabItem as the tab that's about to become active.  We intercept  
-
-### Dynamic Data
-
-To load dynamic data into a page, you must first put the data into dixie.  The basic way is to set up "stores" and define the indexable fields, eg..
-
-```yaml
-survos_js_twig:
-  debug: true
-  db: omar-db
-  version: 7
-  stores:
-    -
-      name: items
-      schema: "++id,code,title,projectCode"
-      url: /api/items
-    -
-      name: projects
-      schema: "code"
-      url: /api/projects
+```twig
+{% include '@SurvosMobile/tabbar.html.twig' %}
 ```
 
-### Stimulus Helpers
+which iterates `mobile_pages.tabPages` — no more hand-written `KnpMenuEvent`
+listeners or a raw `config.tabs` loop of unclear origin.
 
-https://github.com/symfony/ux/blob/2.x/src/StimulusBundle/src/Dto/StimulusAttributes.php
+## App shell
 
-tests: https://github.com/symfony/ux/blob/2.x/src/StimulusBundle/tests/Twig/StimulusTwigExtensionTest.php
+Extend `mobile_app_controller.js` (imported via
+`{{ stimulus_controller(survos_stimulus('mobile-bundle', 'app'), {...}) }}`,
+per `AGENTS.md`'s Stimulus-naming rule — never hard-code the identifier) on
+your `#app` element instead of copy-pasting Framework7 + `DbUtilities`
+bootstrapping into every app's own `app_controller.js`:
 
-I need a create and publish an es6 package that exports 3 functions produce the exact same result as their PHP counterpart.
-
-For example,
-
-
-```js
-import {stimulus_controller, stimulus_target, stimulus_action} from 'stimulus-twig';
-
-let str = stimulus_controller('my-controller',  {myValue: 'scalar-value'});
-console.assert(str == 'data-controller="my-controller" data-my-controller-my-value-value="scalar-value"');
+```twig
+<div id="app" {{ stimulus_controller(survos_stimulus('mobile-bundle', 'app'), {
+    name: 'MyApp',
+    configCode: 'myproject',
+    config: survos_fw_config,
+}) }}>
 ```
 
-All of the tests can be found (in PHP) at  https://github.com/symfony/ux/blob/2.x/src/StimulusBundle/tests/Twig/StimulusTwigExtensionTest.php
-The PHP code is at https://github.com/symfony/ux/blob/2.x/src/StimulusBundle/src/Dto/StimulusAttributes.php 
-The methods should be able to return an array and a string, exactly as the PHP code does.  Fortunately, the PHP code is very well written
+It boots Framework7 on that element and, from the same `survos_fw.yaml`
+`projects[].stores` config `fw-bundle` already defines (no separate/duplicate
+store config here — see fw-bundle's `AGENTS.md`), constructs
+`js-twig-bundle`'s `DbUtilities` once, dispatching the usual `dbready` event
+your page controllers already listen for.
 
-This job consists of the following:
+## Rendering data
 
-* Convert the PHP unit tests to javascript, using Jest or another testing packing.
-* Convert the PHP code to an es6 class that exports the 3 methods and passes the tests
-* Push the code to a github repo
-* Publish the package to npmjs, and make sure it works with package bundlers like jsdelivr and unpkg 
-
-Please point to a package on npmjs that you've written
-
-## Requirement
-
-bin/console importmap:require stimulus-attributes
-bin/console importmap:require fos-routing
-composer req friendsofsymfony/jsrouting-bundle
-
+Use `js-twig-bundle`'s decoupled `compileTwigBlocks`/`twigRender` API
+directly in your page's own Stimulus controller — not `<twig:dexie>`, which
+carries PHP-side schema plumbing that's unused in every app surveyed so far.
+See `js-twig-bundle`'s README for that API, and `~/sites/dadjokes` for a full
+worked example (a page controller reading `window.db`, rendering a
+precompiled `<twig:block>`, and writing back Leitner-scheduling state).

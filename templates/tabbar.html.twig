@@ -1,0 +1,17 @@
+{#
+    Renders the F7 bottom tab bar from the app's #[MobilePage] declarations
+    (see Survos\MobileBundle\Attribute\MobilePage / MobilePageRegistry) — one
+    link per tab, pointing at that tab's lowest-`order` page. Replaces both the
+    raw `config.tabs` Twig loop and the never-wired KnpMenuEvent path that
+    fw-bundle's start.html.twig used before this bundle existed.
+#}
+<div class="toolbar toolbar-bottom">
+    <div class="toolbar-inner">
+        {% for tab, page in mobile_pages.tabPages %}
+            <a href="{{ path(page.route) }}" class="tab-link{{ app.request.attributes.get('_route') == page.route ? ' tab-link-active' : '' }}">
+                {% if page.icon %}<twig:ux:icon name="{{ page.icon }}" width="24px" />{% endif %}
+                <span class="tabbar-label">{{ page.title }}</span>
+            </a>
+        {% endfor %}
+    </div>
+</div>

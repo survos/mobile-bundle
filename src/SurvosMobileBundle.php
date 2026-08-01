@@ -1,76 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Survos\MobileBundle;
 
 use Survos\Kit\AbstractUxBundle;
-use Survos\MobileBundle\Event\KnpMenuEvent;
-use Survos\MobileBundle\Components\MenuComponent;
-use Survos\MobileBundle\Menu\MenuService;
-use Survos\MobileBundle\Twig\TwigExtension;
-use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
-use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Survos\Kit\SurvosKitBundle;
+use Survos\MobileBundle\Compiler\MobilePagePass;
+use Survos\MobileBundle\Registry\MobilePageRegistry;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Kernel\RequiredBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-use Symfony\Component\DependencyInjection\Reference;
+
+#[RequiredBundle(SurvosKitBundle::class)]
 // Symfony\Component\HttpKernel\Bundle\Bundle <-- Flex auto-registration marker (see Survos\Kit\AbstractSurvosBundle)
-class SurvosMobileBundle extends AbstractUxBundle implements CompilerPassInterface
+final class SurvosMobileBundle extends AbstractUxBundle
 {
-    public const ASSET_PACKAGE = 'mobile';
-
-
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+        parent::loadExtension($config, $container, $builder);
 
-        $builder->register(MenuComponent::class)->setAutowired(true)->setAutoconfigured(true)
-            ->setArgument('$menuOptions', []) // $config['menu_options'])
-            ->setArgument('$helper', new Reference('knp_menu.helper'))
-            ->setArgument('$factory', new Reference('knp_menu.factory'))
-            ->setArgument('$eventDispatcher', new Reference('event_dispatcher'));
-        ;
-
-        $builder->register(TwigExtension::class)
-            ->addTag('twig.extension');
-
-        $builder->register(MenuService::class)
-            ->setAutowired(true)
-            ->setArgument(
-                '$authorizationChecker',
-                new Reference('security.authorization_checker', ContainerInterface::NULL_ON_INVALID_REFERENCE)
-            )
-            ->setArgument(
-                '$security',
-                new Reference('security.helper', ContainerInterface::NULL_ON_INVALID_REFERENCE)
-            );
-
+        $builder->register(MobilePageRegistry::class)
+            ->setAutowired(true)->setAutoconfigured(true)->setPublic(true)
+            ->setArgument('$descriptors', []);
     }
 
-    public function process(ContainerBuilder $container): void
+    public function build(ContainerBuilder $container): void
     {
-//        if (false === $container->hasDefinition('twig')) {
-//            throw new \RuntimeException('Twig service not found, composer require twig/twig');
-//            assert(false, "missing twig");
-//            return;
-//        }
-        $def = $container->getDefinition('twig');
+        parent::build($container);
 
-        // add the constants to twig to make calling the menu easier.
+        $container->addCompilerPass(new MobilePagePass());
+    }
 
-        $eventClass = (new \ReflectionClass(KnpMenuEvent::class));
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        parent::prependExtension($container, $builder);
 
-        foreach ($eventClass->getConstants() as $name => $value) {
-            $def->addMethodCall('addGlobal', [$name, $value]);
+        if ($builder->hasExtension('twig')) {
+            $builder->prependExtensionConfig('twig', [
+                'globals' => [
+                    'mobile_pages' => '@' . MobilePageRegistry::class,
+                ],
+            ]);
         }
-
-    }
-
-
-        public function configure(DefinitionConfigurator $definition): void
-    {
-        $definition->rootNode()
-            ->children()
-            ->scalarNode('theme')->defaultValue('pagestack')->end()
-            ->booleanNode('enabled')->defaultTrue()->end()
-            ->end();
     }
 }

@@ -1,21 +1,18 @@
 {
-  "name": "@survos/mobile",
-  "description": "integrate onsonui and other libraries with Symfony",
+  "name": "@survos/mobile-bundle",
+  "description": "Declarative app pages + generic Framework7/Dexie app-shell controller for Symfony mobile PWAs",
   "license": "MIT",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "symfony": {
     "controllers": {
-      "mobile": {
-        "main": "src/controllers/mobile_controller.js",
+      "app": {
+        "main": "src/controllers/mobile_app_controller.js",
         "webpackMode": "eager",
-        "fetch": "lazy",
-        "enabled": true,
-        "autoimport": {}
+        "fetch": "eager",
+        "enabled": true
       }
     },
-    "importmap": {
-      "@survos-mobile/mobile": "path:%PACKAGE%/src/controllers/mobile_controller.js"
-    }
+    "importmap": {}
   },
   "peerDependencies": {
     "@hotwired/stimulus": "^3.2.0"

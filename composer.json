@@ -1,6 +1,6 @@
 {
     "name": "survos/mobile-bundle",
-    "description": "Bundle with utilities for creating a Symfony-based mobile app",
+    "description": "Declarative #[MobilePage] app pages + generic Framework7/Dexie app-shell wiring for Symfony mobile PWAs",
     "keywords": [
         "symfony-ux"
     ],
@@ -11,12 +11,14 @@
         "symfony/config": "^8.1",
         "symfony/dependency-injection": "^8.1",
         "symfony/http-kernel": "^8.1",
+        "symfony/routing": "^8.1",
         "twig/twig": "^3.4",
-        "knplabs/knp-menu-bundle": "^3.2",
-        "symfony/event-dispatcher": "^8.1",
         "symfony/ux-twig-component": "^3",
-        "symfony/options-resolver": "^8.1",
-        "survos/kit-bundle": "^2.5"
+        "symfony/ux-icons": "^2.29",
+        "survos/kit-bundle": "^2.5",
+        "survos/atlas-bundle": "*",
+        "survos/fw-bundle": "*",
+        "survos/js-twig-bundle": "*"
     },
     "require-dev": {
         "phpstan/phpstan": "^2.0",
