@@ -29,6 +29,10 @@
         "symfony/var-dumper": "^8.1",
         "symfony/security-bundle": "^8.1"
     },
+    "suggest": {
+        "spomky-labs/pwa-bundle": "For installable/offline PWA support (manifest, service worker) — not required, most mobile-bundle apps don't need it.",
+        "ext-imagick": "Only if spomky-labs/pwa-bundle's favicon/icon generation is enabled — it needs a real image processor with SVG rasterization support. ext-gd is NOT sufficient (no SVG support). This really belongs as a suggestion on spomky-labs/pwa-bundle itself, not here — noted locally until that lands upstream. Heroku/Dokku's default php buildpack does not install it; add it to your app's own composer.json require to get the buildpack to install it."
+    },
     "autoload": {
         "psr-4": {
             "Survos\\MobileBundle\\": "src/"
