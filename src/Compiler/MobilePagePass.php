@@ -30,7 +30,7 @@ final class MobilePagePass implements CompilerPassInterface
 
         foreach (ControllerAtlasBuilder::build($container) as $route) {
             $hits = $route->attributesOf(MobilePage::class);
-            if ($hits === []) {
+            if ([] === $hits) {
                 continue;
             }
 

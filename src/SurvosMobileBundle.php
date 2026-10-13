@@ -39,7 +39,7 @@ final class SurvosMobileBundle extends AbstractUxBundle
         if ($builder->hasExtension('twig')) {
             $builder->prependExtensionConfig('twig', [
                 'globals' => [
-                    'mobile_pages' => '@' . MobilePageRegistry::class,
+                    'mobile_pages' => '@'.MobilePageRegistry::class,
                 ],
             ]);
         }

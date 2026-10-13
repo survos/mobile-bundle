@@ -22,7 +22,7 @@ final class MobilePageRegistry
     ) {
         $byTab = [];
         foreach ($descriptors as $descriptor) {
-            if ($descriptor->tab !== null) {
+            if (null !== $descriptor->tab) {
                 $byTab[$descriptor->tab][] = $descriptor;
             }
         }
